@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.api.board.board.mapper.BoardMapper">
+
+    <select id="getBoardList" parameterType="long" resultType="com.api.board.board.Board">
+        SELECT * FROM board
+    </select>
+
+    <select id="getBoard" parameterType="Long" resultType="com.api.board.board.Board">
+        SELECT * FROM board WHERE no = #{board}
+    </select>
+
+    <insert id="insertBoard" parameterType="com.api.board.board.Board" keyColumn="no">
+        INSERT INTO board (title, contents)
+        VALUES (#{title}, #{contents})
+    </insert>
+
+
+</mapper>
