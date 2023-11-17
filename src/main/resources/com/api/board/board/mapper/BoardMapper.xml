@@ -3,18 +3,49 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.board.board.mapper.BoardMapper">
 
-    <select id="getBoardList" parameterType="long" resultType="com.api.board.board.Board">
-        SELECT * FROM board
-    </select>
-
-    <select id="getBoard" parameterType="Long" resultType="com.api.board.board.Board">
-        SELECT * FROM board WHERE no = #{board}
+    <select id="getBoardList" parameterType="com.api.board.board.BoardSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM board
+        ORDER BY large_code
     </select>
 
     <insert id="insertBoard" parameterType="com.api.board.board.Board" keyColumn="no">
-        INSERT INTO board (title, contents)
-        VALUES (#{title}, #{contents})
+        INSERT INTO board (title, contents, reg_user, reg_date, mod_user, mod_date, large_code, middle_code)
+        VALUES (#{title}, #{contents}, #{regUser}, #{regDate}, #{modUser}, #{modDate}, #{largeCode}, #{middleCode})
     </insert>
 
+    <select id="getListWithPaging" parameterType="com.api.board.board.BoardSearch"
+            resultType="com.api.board.board.Board">
+        SELECT no, title, contents, reg_user, reg_date, mod_user, mod_date, large_code
+        FROM board
+        <where>
+            <trim prefixOverrides="OR">
+                <foreach item="type" collection="typeArr">
+                    <trim prefix="OR">
+                        <choose>
+                            <when test="type == 'T'.toString()">
+                                title LIKE '%'||#{keyword}||'%'
+                            </when>
+                            <when test="type == 'D'.toString()">
+                                reg_date LIKE '%'||#{keyword}||'%'
+                            </when>
+                        </choose>
+                    </trim>
+                </foreach>
+            </trim>
+        </where>
+        ORDER BY no DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="getLargeCodes" resultType="java.lang.String">
+        SELECT DISTINCT large_code, large_code_name
+        FROM large_code
+    </select>
+
+    <select id="getMiddleCodes" resultType="java.lang.String">
+        SELECT DISTINCT middle_code, middle_code_name
+        FROM middle_code
+    </select>
 
 </mapper>

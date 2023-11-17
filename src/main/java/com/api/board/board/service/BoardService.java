@@ -12,16 +12,30 @@ import java.util.List;
 @Service
 public class BoardService {
     private BoardMapper boardMapper;
+
     @Autowired
-    public BoardService(BoardMapper boardMapper){
+    public BoardService(BoardMapper boardMapper) {
         this.boardMapper = boardMapper;
     }
-    public List<Board> getBoardList(){
 
+    public int getBoardList() {
         return boardMapper.getBoardList();
     }
+
     @Transactional
-    public void insertBoard(Board board)throws Exception{
-       boardMapper.insertBoard(board);
+    public void insertBoard(Board board) throws Exception {
+        boardMapper.insertBoard(board);
+    }
+
+    public List<Board> getListWithPaging(BoardSearch boardSearch) {
+        int offset = (boardSearch.getCurPage() - 1) * boardSearch.getPageSize();
+        return boardMapper.getListWithPaging(boardSearch);
+    }
+    public List<String> getLargeCodes() {
+        return boardMapper.getLargeCodes();
+    }
+
+    public List<String> getMiddleCodes() {
+        return boardMapper.getMiddleCodes();
     }
 }

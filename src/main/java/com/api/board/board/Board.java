@@ -10,8 +10,10 @@ public class Board {
    private Long no;
    private Long subNo;
    private Long seq;
-   private Long largeCode;
-   private Long middleCode;
+   private String largeCode;
+   private String largeCodeName;
+   private String middleCode;
+   private String middleCodeName;
    private String title;
    private String contents;
    private String level;
