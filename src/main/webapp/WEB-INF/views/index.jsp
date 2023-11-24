@@ -7,8 +7,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
     <title>Board</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <style>
     *{margin: 0; padding: 0; box-sizing: border-box;}
@@ -19,5 +20,6 @@
 <body>
 <jsp:include page="cookieLogin.jsp"></jsp:include>
 <jsp:include page="login.jsp"></jsp:include>
+<jsp:include page="list.jsp"></jsp:include>
 </body>
 </html>

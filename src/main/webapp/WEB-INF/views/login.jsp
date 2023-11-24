@@ -4,7 +4,6 @@
     <c:choose>
         <c:when test="${nameCookie != null}">
             <p><strong>${nameCookie.name} [${nameCookie.value}] </strong> 님, 로그인되었습니다.</p>
-            <jsp:include page="list.jsp"></jsp:include>
         </c:when>
         <c:otherwise>
             <p> 로그인되지 않았습니다.</p>

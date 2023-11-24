@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class BoardService {
@@ -26,10 +28,20 @@ public class BoardService {
     public void insertBoard(Board board) throws Exception {
         boardMapper.insertBoard(board);
     }
-
     public List<Board> getListWithPaging(BoardSearch boardSearch) {
         int offset = (boardSearch.getCurPage() - 1) * boardSearch.getPageSize();
-        return boardMapper.getListWithPaging(boardSearch);
+        String keyword = boardSearch.getKeyword();
+        String[] typeArr = boardSearch.getTypeArr();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("offset", offset);
+        params.put("pageSize", boardSearch.getPageSize());
+        params.put("keyword", keyword);
+        params.put("typeArr", typeArr);
+
+        List<Board> pagedBoardList = boardMapper.getListWithPaging(params);
+
+        return pagedBoardList;
     }
     public List<String> getLargeCodes() {
         return boardMapper.getLargeCodes();

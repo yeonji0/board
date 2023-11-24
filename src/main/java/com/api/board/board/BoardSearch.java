@@ -1,12 +1,13 @@
 package com.api.board.board;
 
 import lombok.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Getter
 @Setter
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class BoardSearch {
     private int curPage;
     private int listCnt;
@@ -18,31 +19,26 @@ public class BoardSearch {
     private int endPage;
     private int prevPage;
     private int nextPage;
+    private int offset;
+    private int amount;
     private String type;
     private String keyword;
+
     public String[] getTypeArr() {
         return type == null ? new String[]{} : type.split("");
     }
-    public BoardSearch getBoardSearch() {
-        return this;
-    }
-    private int offset;
-    private int amount;
 
     public BoardSearch(int listCnt, int curPage, int pageSize, int rangeSize) {
         this.listCnt = listCnt;
         this.curPage = curPage;
         this.pageSize = pageSize;
         this.rangeSize = rangeSize;
+        this.pageCnt = (int) Math.ceil((double) listCnt / pageSize);
 
         rangeSetting(curPage);
 
         this.offset = (curPage - 1) * pageSize;
         this.amount = pageSize;
-    }
-
-    public BoardSearch(int listCnt, int curPage) {
-        this(listCnt, curPage, 3, 5);
     }
 
     public void setPageCnt(int listCnt) {

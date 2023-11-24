@@ -1,7 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <div class="container">
-    <jsp:include page="search.jsp"></jsp:include>
+    <form action="/search" method="get">
+        <div class="fields">
+            <select name="type">
+                <option value="">전체</option>
+                <option value="no">번호</option>
+                <option value="title">제목</option>
+                <option value="regDate">날짜</option>
+            </select>
+            <input type="text" name="keyword" id="keyword" placeholder="검색어"/>
+            <button type="submit">검색</button>
+        </div>
+    </form>
     <div class="row">
         <div class="col-sm-12">
             <table class="table">
@@ -18,51 +29,56 @@
                     <th scope="col">수정일시</th>
                 </tr>
                 </thead>
-                <tbody>
-                <c:forEach var="board" items="${boardList}" varStatus="status">
-                    <c:choose>
-                        <c:when test="${nameCookie.value == board.regUser}">
-                            <tr class="text-center">
-                                <td>
-                                    <p><input type="checkbox"></p>
-                                </td>
-                                <td>
-                                    <p>${board.no}</p>
-                                </td>
-                                <td>
-                                    <p>${board.largeCode}</p>
-                                </td>
-                                <td>
-                                    <p>${board.title}</p>
-                                </td>
-                                <td>
-                                    <p>첨부파일</p>
-                                </td>
-                                <td>
-                                    <p>${board.regUser}</p>
-                                </td>
-                                <td>
-                                    <p>${board.regDate}</p>
-                                </td>
-                                <td>
-                                    <p>${board.modUser}</p>
-                                </td>
-                                <td>
-                                    <p>${board.modDate}</p>
-                                </td>
-                            </tr>
-                        </c:when>
-                    </c:choose>
-                </c:forEach>
-                </tbody>
+                <tb>
+                    <c:if test="${not empty boardList}">
+                        <c:forEach var="board" items="${boardList}" varStatus="status">
+                            <c:if test="${empty nameCookie.value || nameCookie.value == board.regUser}">
+                                <tr class="text-center">
+                                    <td>
+                                        <p><input type="checkbox"></p>
+                                    </td>
+                                    <td>
+                                        <p>${board.no}</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.largeCode}</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.title}</p>
+                                    </td>
+                                    <td>
+                                        <p>첨부파일</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.regUser}</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.regDate}</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.modUser}</p>
+                                    </td>
+                                    <td>
+                                        <p>${board.modDate}</p>
+                                    </td>
+                                </tr>
+                            </c:if>
+                        </c:forEach>
+                    </c:if>
+                    <c:if test="${empty boardList}">
+                        <tr>
+                            <td colspan="9" class="text-center">검색 결과가 없습니다.</td>
+                        </tr>
+                    </c:if>
+                </tb>
             </table>
             <nav aria-label="Page navigation example">
                 <div class="row">
                     <div class="col-sm-12">
                         <select id="pageSizeSelect" onchange="changePageSize(this)">
-                            <option value="10" ${boardSearch.pageSize == 10 ? 'selected' : ''}>10</option>
-                            <option value="20" ${boardSearch.pageSize == 20 ? 'selected' : ''}>20</option>
-                            <option value="100" ${boardSearch.pageSize == 100 ? 'selected' : ''}>100</option>
+                            <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+                            <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+                            <option value="100" ${pageSize == 100 ? 'selected' : ''}>100</option>
                         </select>
                     </div>
                 </div>
@@ -116,8 +132,9 @@
         var url = window.location.href.split('?')[0] + '?page=1&pageSize=' + pageSize;
         window.location.href = url;
     }
+
     function fn_paging(page) {
-        var url = '?page=' + page + '&pageSize=' + ${boardSearch.pageSize};
+        var url = '?page=' + page + '&pageSize=' + ${pageSize};
         window.location.href = url;
     }
 </script>
