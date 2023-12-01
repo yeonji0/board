@@ -9,7 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class BoardController {
@@ -29,7 +31,7 @@ public class BoardController {
                         @RequestParam(defaultValue = "") String type) {
         int listCnt = boardService.getBoardList();
         BoardSearch boardSearch = new BoardSearch(listCnt, page, pageSize, 5);
-        boardSearch.setType(type);
+        //boardSearch.setType(type);
         boardSearch.setKeyword(keyword);
 
         List<Board> pagedBoardList = boardService.getListWithPaging(boardSearch);
@@ -84,21 +86,53 @@ public class BoardController {
 
         return "redirect:/";
     }
+    @PostMapping("/deleteSelected")
+    public String deleteSelectedBoards(@RequestParam(value = "selectedBoards", required = false) List<Long> selectedBoards) {
+        if (selectedBoards != null && !selectedBoards.isEmpty()) {
+            for (Long boardNo : selectedBoards) {
+                boardService.deleteBoard(boardNo);
+            }
+        }
+        return "redirect:/";
+    }
 
     @GetMapping("/search")
     public String getListWithPaging(Model model,
                                     @RequestParam(name = "page", defaultValue = "1") Integer page,
                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                    @RequestParam(defaultValue = "") String keyword,
-                                    @RequestParam(defaultValue = "") String type) {
-        int listCnt = boardService.getBoardList();
-        BoardSearch boardSearch = new BoardSearch(listCnt, page, pageSize, 5);
-        boardSearch.setType(type);
-        boardSearch.setKeyword(keyword);
+                                    @RequestParam(name = "no", defaultValue = "") String no,
+                                    @RequestParam(name = "title", defaultValue = "") String title,
+                                    @RequestParam(name = "regDate", defaultValue = "") String regDate,
+                                    @RequestParam(name = "type", defaultValue = "") String type) {
+        Map<String, Object> searchParams = new HashMap<>();
+//        searchParams.put("no", no);
+//        searchParams.put("title", title);
+//        searchParams.put("regDate", regDate);
+//        searchParams.put("type", type);
 
-        List<Board> pagedBoardList = boardService.getListWithPaging(boardSearch);
+        int totalSearchResult = boardService.getCountWithSearch(searchParams);
+
+
+        BoardSearch boardSearch = new BoardSearch(totalSearchResult, page, pageSize, 5);
+//        boardSearch.setKeyword(no);
+//        boardSearch.setType("no");
+
+//        if (!title.isEmpty()) {
+//            boardSearch.setKeyword(title);
+//            boardSearch.setType("title");
+//        } else if (!regDate.isEmpty()) {
+//            boardSearch.setKeyword(regDate);
+//            boardSearch.setType("regDate");
+//        }
+
+        boardSearch.setType(type);
+        boardSearch.setListCnt(totalSearchResult);
+        boardSearch.setOffset((page - 1) * pageSize);
+        boardSearch.setAmount(pageSize);
+
         List<String> largeCodes = boardService.getLargeCodes();
         List<String> middleCodes = boardService.getMiddleCodes();
+        List<Board> pagedBoardList = boardService.getListWithPaging(boardSearch);
 
         model.addAttribute("boardSearch", boardSearch);
         model.addAttribute("nameCookie", nameCookie);
@@ -106,11 +140,14 @@ public class BoardController {
         model.addAttribute("boardList", pagedBoardList);
         model.addAttribute("largeCodes", largeCodes);
         model.addAttribute("middleCodes", middleCodes);
-
-        System.out.println("Type: " + type);
-        System.out.println("Keyword: " + keyword);
         System.out.println("Search Result Size: " + pagedBoardList.size() + pagedBoardList);
         return "search";
+    }
+
+    @GetMapping("/getMiddleCodes")
+    @ResponseBody
+    public List<String> getMiddleCodesByLargeCode(@RequestParam String largeCode) {
+        return boardService.getMiddleCodesByLargeCode(largeCode);
     }
 
 }

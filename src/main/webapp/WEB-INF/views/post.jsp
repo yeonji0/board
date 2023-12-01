@@ -17,20 +17,15 @@
 <div class="container">
     <form action="/post" method="post" name="loginForm">
         <div class="form-group row">
-            <label class="col-sm-2 col-form-label"><strong>구분</strong></label>
-            <div class="">
-                <select name="largeCode">
+            <div class="field">
+                <label>구분</label>
+                <select name="largeCode" id="largeCodeSelect" onchange="changeLargeCode()">
+                    <option value="" selected>--</option>
                     <c:forEach var="largeCode" items="${largeCodes}">
-                        <option value="${largeCode}">${largeCode}</option>
+                        <option value="${largeCode}" ${param.largeCode eq largeCode ? 'selected' : ''}>${largeCode}</option>
                     </c:forEach>
                 </select>
-            </div>
-            <div class="">
-                <select name="middleCode">
-                    <c:forEach var="middleCode" items="${middleCodes}">
-                        <option value="${middleCode}">${middleCode}</option>
-                    </c:forEach>
-                </select>
+                <select name="middleCode" id="middleCodeSelect"></select>
             </div>
         </div>
         <div class="form-group row">
@@ -58,10 +53,31 @@
             <div class="col-auto">
                 <input class="btn btn-primary" type="button" value="닫기" onclick="location.href='/'"/>
                 <input class="btn btn-success" type="submit" value="저장"/>
-                <input class="btn" type="submit" value="삭제"/>
             </div>
         </div>
     </form>
 
 </div>
 </body>
+<script>
+    function changeLargeCode() {
+        var largeCodeSelect = document.getElementById("largeCodeSelect");
+        var middleCodeSelect = document.getElementById("middleCodeSelect");
+        var selectedLargeCode = largeCodeSelect.value;
+
+
+        middleCodeSelect.innerHTML = "";
+
+        fetch('/getMiddleCodes?largeCode=' + selectedLargeCode)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(middleCode => {
+                    var option = document.createElement("option");
+                    option.value = middleCode;
+                    option.text = middleCode;
+                    middleCodeSelect.add(option);
+                });
+            })
+            .catch(error => console.error('Error fetching middleCodes:', error));
+    }
+</script>

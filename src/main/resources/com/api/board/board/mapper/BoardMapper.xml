@@ -14,34 +14,58 @@
         VALUES (#{title}, #{contents}, #{regUser}, #{regDate}, #{modUser}, #{modDate}, #{largeCode}, #{middleCode})
     </insert>
 
-    <select id="getListWithPaging" parameterType="String" resultType="com.api.board.board.Board">
-    SELECT *
-    FROM (
-    SELECT no, title, contents, reg_user, reg_date, mod_user, mod_date, large_code
-    FROM board
-            <trim prefix="where (" suffix=")" prefixOverrides="OR">
-                <foreach item="type" collection="typeArr">
-                    <trim prefix="OR">
-                        <choose>
-                            <when test="type =='title'.toString()">
-                                title like "'%'+${keyword}+'%'"
-                            </when>
-                            <when test="type =='no'.toString()">
-                                no like CONCAT('%', #{keyword}, '%')
-                            </when>
-                            <when test="type =='regDate'.toString()">
-                                reg_date like "'%'+${keyword}+'%'"
-                            </when>
-                        </choose>
-                    </trim>
-                </foreach>
-            </trim>
-        )
-        AS temp
-    ORDER BY no DESC
-    LIMIT #{offset}, #{pageSize}
+    <delete id="deleteBoard" parameterType="com.api.board.board.Board">
+        delete from board where no = #{no}
+    </delete>
+
+    <select id="getListWithPaging" parameterType="com.api.board.board.BoardSearch" resultType="com.api.board.board.Board">
+        SELECT *
+        FROM (
+        SELECT no, title, contents, reg_user, reg_date, mod_user, mod_date, large_code
+        FROM board
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <foreach item="type" collection="typeArr">
+                <choose>
+                    <when test="type =='no'.toString()">
+                        AND no like CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <when test="type =='title'.toString()">
+                        AND title like CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <when test="type =='regDate'.toString()">
+                        AND reg_date like CONCAT('%', #{keyword}, '%')
+                    </when>
+                </choose>
+            </foreach>
+        </trim>
+        ORDER BY no DESC
+        ) AS temp
+        LIMIT #{offset}, #{pageSize}
     </select>
 
+<!--    <select id="getSearchResultCount" parameterType="java.util.Map" resultType="int">-->
+<!--        SELECT COUNT(*)-->
+<!--        FROM board-->
+<!--        <trim prefix="WHERE" prefixOverrides="AND">-->
+<!--            <foreach item="type" collection="typeArr">-->
+<!--                <choose>-->
+<!--                    <when test="type =='no'.toString()">-->
+<!--                        AND no like CONCAT('%', #{keyword}, '%')-->
+<!--                    </when>-->
+<!--                    <when test="type =='title'.toString()">-->
+<!--                        AND title like CONCAT('%', #{keyword}, '%')-->
+<!--                    </when>-->
+<!--                    <when test="type =='regDate'.toString()">-->
+<!--                        AND reg_date like CONCAT('%', #{keyword}, '%')-->
+<!--                    </when>-->
+<!--                </choose>-->
+<!--            </foreach>-->
+<!--        </trim>-->
+<!--    </select>-->
+
+    <select id="getCountWithSearch" parameterType="java.util.Map" resultType="int">
+        SELECT COUNT(*) FROM board
+    </select>
 
     <select id="getLargeCodes" resultType="java.lang.String">
         SELECT DISTINCT large_code, large_code_name
@@ -51,6 +75,12 @@
     <select id="getMiddleCodes" resultType="java.lang.String">
         SELECT DISTINCT middle_code, middle_code_name
         FROM middle_code
+    </select>
+
+    <select id="getMiddleCodesByLargeCode" resultType="java.lang.String">
+        SELECT DISTINCT middle_code, middle_code_name
+        FROM middle_code
+        WHERE large_code = #{largeCode}
     </select>
 
 </mapper>

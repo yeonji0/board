@@ -14,10 +14,15 @@ public interface BoardMapper {
 
     void insertBoard(Board board) throws Exception;
 
+    void deleteBoard(Long no);
+
     List<Board> getListWithPaging(Map<String, Object> params);
 
     List<String> getLargeCodes();
 
     List<String> getMiddleCodes();
 
+    List<String> getMiddleCodesByLargeCode(String largeCode);
+
+    int getCountWithSearch(Map<String, Object> params);
 }
