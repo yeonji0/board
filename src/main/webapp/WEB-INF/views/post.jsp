@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="th" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"/>
     <title>Board</title>
@@ -15,7 +16,7 @@
 </style>
 <body>
 <div class="container">
-    <form action="/post" method="post" name="loginForm">
+    <form action="/post" method="post" name="postForm" id="postForm">
         <div class="form-group row">
             <div class="field">
                 <label>구분</label>
@@ -60,6 +61,12 @@
 </div>
 </body>
 <script>
+    function showAlert() {
+        var message = '<spring:message code="002"></spring:message>';
+        alert(message);
+    }
+    document.getElementById('postForm').addEventListener('submit', showAlert);
+
     function changeLargeCode() {
         var largeCodeSelect = document.getElementById("largeCodeSelect");
         var middleCodeSelect = document.getElementById("middleCodeSelect");

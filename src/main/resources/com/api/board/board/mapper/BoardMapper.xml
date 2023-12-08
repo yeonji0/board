@@ -26,14 +26,14 @@
         <trim prefix="WHERE" prefixOverrides="AND">
             <foreach item="type" collection="typeArr">
                 <choose>
-                    <when test="type =='no'.toString()">
+                    <when test="type == 'no'.toString()">
                         AND no like CONCAT('%', #{keyword}, '%')
                     </when>
-                    <when test="type =='title'.toString()">
+                    <when test="type == 'title'.toString()">
                         AND title like CONCAT('%', #{keyword}, '%')
                     </when>
-                    <when test="type =='regDate'.toString()">
-                        AND reg_date like CONCAT('%', #{keyword}, '%')
+                    <when test='startDate != null and endDate != null'>
+                        AND DATE_FORMAT(reg_date, '%Y%m%d') BETWEEN #{startDate} AND #{endDate}
                     </when>
                 </choose>
             </foreach>
@@ -43,25 +43,25 @@
         LIMIT #{offset}, #{pageSize}
     </select>
 
-<!--    <select id="getSearchResultCount" parameterType="java.util.Map" resultType="int">-->
-<!--        SELECT COUNT(*)-->
-<!--        FROM board-->
-<!--        <trim prefix="WHERE" prefixOverrides="AND">-->
-<!--            <foreach item="type" collection="typeArr">-->
-<!--                <choose>-->
-<!--                    <when test="type =='no'.toString()">-->
-<!--                        AND no like CONCAT('%', #{keyword}, '%')-->
-<!--                    </when>-->
-<!--                    <when test="type =='title'.toString()">-->
-<!--                        AND title like CONCAT('%', #{keyword}, '%')-->
-<!--                    </when>-->
-<!--                    <when test="type =='regDate'.toString()">-->
-<!--                        AND reg_date like CONCAT('%', #{keyword}, '%')-->
-<!--                    </when>-->
-<!--                </choose>-->
-<!--            </foreach>-->
-<!--        </trim>-->
-<!--    </select>-->
+    <!--    <select id="getSearchResultCount" parameterType="java.util.Map" resultType="int">-->
+    <!--        SELECT COUNT(*)-->
+    <!--        FROM board-->
+    <!--        <trim prefix="WHERE" prefixOverrides="AND">-->
+    <!--            <foreach item="type" collection="typeArr">-->
+    <!--                <choose>-->
+    <!--                    <when test="type =='no'.toString()">-->
+    <!--                        AND no like CONCAT('%', #{keyword}, '%')-->
+    <!--                    </when>-->
+    <!--                    <when test="type =='title'.toString()">-->
+    <!--                        AND title like CONCAT('%', #{keyword}, '%')-->
+    <!--                    </when>-->
+    <!--                    <when test="type =='regDate'.toString()">-->
+    <!--                        AND reg_date like CONCAT('%', #{keyword}, '%')-->
+    <!--                    </when>-->
+    <!--                </choose>-->
+    <!--            </foreach>-->
+    <!--        </trim>-->
+    <!--    </select>-->
 
     <select id="getCountWithSearch" parameterType="java.util.Map" resultType="int">
         SELECT COUNT(*) FROM board

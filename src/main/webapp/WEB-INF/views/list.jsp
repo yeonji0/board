@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <div class="container">
     <form id="searchForm" action="/search" method="get">
         <div class="fields row">
@@ -23,13 +24,19 @@
                 <select name="middleCode" id="middleCodeSelect"></select>
             </div>
             <div class="field">
-                <label for="regDate">날짜</label>
-                <input type="text" id="regDate" name="regDate" placeholder="검색어" value="${param.regDate}">
+                <label for="startDate">등록일자</label>
+                <input type="text" id="startDate" name="startDate" placeholder="시작일" value="${param.startDate}">
+            </div>
+            <div class="field">
+                <label for="endDate">~</label>
+                <input type="text" id="endDate" name="endDate" placeholder="종료일" value="${param.endDate}">
             </div>
             <input type="hidden" name="page" value="${boardSearch.curPage}">
             <input type="hidden" name="pageSize" value="${boardSearch.pageSize}">
             <input type="hidden" name="type" value="${param.type}">
             <input type="hidden" name="keyword" value="${param.keyword}">
+            <input type="hidden" name="pageNum" value="1">
+            <input type="hidden" name="amount" value="10">
             <button type="submit">검색</button>
         </div>
     </form>
@@ -90,9 +97,8 @@
                                 </c:if>
                             </c:forEach>
                             <div style="display: flex;justify-content: flex-end;margin: 5px; gap: 5px;">
-                                <button type="button" class="btn btn-primary" onclick="location.href='post'">글쓰기
-                                </button>
-                                <button type="submit" class="btn btn-danger">삭제</button>
+                                <button type="button" class="btn btn-primary" onclick="showPostAlert()">등록</button>
+                                <button type="submit" class="btn btn-danger" onclick="showDeleteAlert()">삭제</button>
                             </div>
                         </form>
                     </c:if>
@@ -168,7 +174,24 @@
         var url = '?page=' + page + '&pageSize=' + ${pageSize};
         window.location.href = url;
     }
+    function showDeleteAlert() {
+        var selectedBoards = document.querySelectorAll('input[name="selectedBoards"]:checked');
 
+        if (selectedBoards.length === 0) {
+            alert('<spring:message code="011"></spring:message>');
+        } else {
+            alert('<spring:message code="004"></spring:message>');
+        }
+    }
+    function showPostAlert() {
+        var nameCookieValue = '${nameCookie.value}';
+
+        if (nameCookieValue) {
+            location.href = 'post';
+        } else {
+            alert('<spring:message code="010"></spring:message>');
+        }
+    }
     function changeLargeCode() {
         var largeCodeSelect = document.getElementById("largeCodeSelect");
         var middleCodeSelect = document.getElementById("middleCodeSelect");
@@ -189,4 +212,34 @@
             })
             .catch(error => console.error('Error fetching middleCodes:', error));
     }
+
+    function validateDateFormat(dateString) {
+        if (dateString.trim() === "") return true;
+        var regex = /^\d{4}-\d{2}-\d{2}$/;
+        return regex.test(dateString);
+    }
+
+    function validateDateRange(startDate, endDate) {
+        if (startDate.trim() === "" || endDate.trim() === "") return true;
+        var start = new Date(startDate);
+        var end = new Date(endDate);
+        return start <= end;
+    }
+
+    $('#searchForm').on('submit', function() {
+        var startDate = $('#startDate').val();
+        var endDate = $('#endDate').val();
+
+        if (!validateDateFormat(startDate) || !validateDateFormat(endDate)) {
+            alert('<spring:message code="008"></spring:message>');
+            return false;
+        }
+
+        if (!validateDateRange(startDate, endDate)) {
+            alert('<spring:message code="009"></spring:message>');
+            return false;
+        }
+
+        return true;
+    });
 </script>

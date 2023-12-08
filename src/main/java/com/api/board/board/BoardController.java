@@ -2,13 +2,20 @@ package com.api.board.board;
 
 import com.api.board.board.service.BoardService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +35,12 @@ public class BoardController {
                         @RequestParam(name = "page", defaultValue = "1") Integer page,
                         @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                         @RequestParam(defaultValue = "") String keyword,
-                        @RequestParam(defaultValue = "") String type) {
+                        @RequestParam(defaultValue = "") String type,
+                        @RequestParam(name = "startDate", defaultValue = "") @DateTimeFormat(pattern = "yyyyMMdd") LocalDate startDate,
+                        @RequestParam(name = "endDate", defaultValue = "") @DateTimeFormat(pattern = "yyyyMMdd") LocalDate endDate
+    ) {
         int listCnt = boardService.getBoardList();
-        BoardSearch boardSearch = new BoardSearch(listCnt, page, pageSize, 5);
-        //boardSearch.setType(type);
+        BoardSearch boardSearch = new BoardSearch(listCnt, page, pageSize, 5, startDate, endDate);
         boardSearch.setKeyword(keyword);
 
         List<Board> pagedBoardList = boardService.getListWithPaging(boardSearch);
@@ -44,7 +53,6 @@ public class BoardController {
         model.addAttribute("boardList", pagedBoardList);
         model.addAttribute("largeCodes", largeCodes);
         model.addAttribute("middleCodes", middleCodes);
-
         return "index";
     }
 
@@ -95,59 +103,86 @@ public class BoardController {
         }
         return "redirect:/";
     }
-
     @GetMapping("/search")
-    public String getListWithPaging(Model model,
+    public String getListWithPaging(Model model, HttpServletRequest request,
                                     @RequestParam(name = "page", defaultValue = "1") Integer page,
                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                     @RequestParam(name = "no", defaultValue = "") String no,
                                     @RequestParam(name = "title", defaultValue = "") String title,
-                                    @RequestParam(name = "regDate", defaultValue = "") String regDate,
+                                    @RequestParam(name = "startDate", defaultValue = "") @DateTimeFormat(pattern = "yyyyMMdd") LocalDate startDate,
+                                    @RequestParam(name = "endDate", defaultValue = "") @DateTimeFormat(pattern = "yyyyMMdd") LocalDate endDate,
                                     @RequestParam(name = "type", defaultValue = "") String type) {
+
+        int listCnt = boardService.getBoardList();
+
         Map<String, Object> searchParams = new HashMap<>();
-//        searchParams.put("no", no);
-//        searchParams.put("title", title);
-//        searchParams.put("regDate", regDate);
-//        searchParams.put("type", type);
+        searchParams.put("no", no);
+        searchParams.put("title", title);
+        searchParams.put("startDate", startDate);
+        searchParams.put("endDate", endDate);
+        searchParams.put("type", type);
+
+        String startDateStr = startDate != null ? startDate.toString() : "";
+        String endDateStr = endDate != null ? endDate.toString() : "";
 
         int totalSearchResult = boardService.getCountWithSearch(searchParams);
 
+        LocalDate parsedStartDate = (startDate == null || startDate.toString().isEmpty()) ? null : LocalDate.parse(startDate.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDate parsedEndDate = (endDate == null || endDate.toString().isEmpty()) ? null : LocalDate.parse(endDate.toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-        BoardSearch boardSearch = new BoardSearch(totalSearchResult, page, pageSize, 5);
-//        boardSearch.setKeyword(no);
-//        boardSearch.setType("no");
+        BoardSearch boardSearch = new BoardSearch(listCnt, page, pageSize, 5, startDate, endDate);
 
-//        if (!title.isEmpty()) {
-//            boardSearch.setKeyword(title);
-//            boardSearch.setType("title");
-//        } else if (!regDate.isEmpty()) {
-//            boardSearch.setKeyword(regDate);
-//            boardSearch.setType("regDate");
-//        }
-
-        boardSearch.setType(type);
-        boardSearch.setListCnt(totalSearchResult);
-        boardSearch.setOffset((page - 1) * pageSize);
-        boardSearch.setAmount(pageSize);
+        boardSearch.setKeyword(title);
+        boardSearch.setType("title");
+        boardSearch.setStartDate(parsedStartDate);
+        boardSearch.setEndDate(parsedEndDate);
 
         List<String> largeCodes = boardService.getLargeCodes();
         List<String> middleCodes = boardService.getMiddleCodes();
+
+        boardSearch.rangeSetting(boardSearch.getCurPage());
+
         List<Board> pagedBoardList = boardService.getListWithPaging(boardSearch);
 
+        boardSearch.setPagedSearchResult(pagedBoardList);
+
+        boardSearch.setOffset((boardSearch.getCurPage() - 1) * boardSearch.getPageSize());
+        boardSearch.setAmount(boardSearch.getPageSize());
+        boardSearch.setPagedSearchResult(pagedBoardList);
+
+        model.addAttribute("boardList", pagedBoardList);
         model.addAttribute("boardSearch", boardSearch);
         model.addAttribute("nameCookie", nameCookie);
         model.addAttribute("pageSize", pageSize);
-        model.addAttribute("boardList", pagedBoardList);
         model.addAttribute("largeCodes", largeCodes);
         model.addAttribute("middleCodes", middleCodes);
+
+        if (parsedStartDate != null && parsedEndDate != null) {
+            System.out.println(parsedStartDate + "+" + parsedEndDate);
+        } else {
+            System.out.println("null");
+        }
+
         System.out.println("Search Result Size: " + pagedBoardList.size() + pagedBoardList);
         return "search";
     }
+
 
     @GetMapping("/getMiddleCodes")
     @ResponseBody
     public List<String> getMiddleCodesByLargeCode(@RequestParam String largeCode) {
         return boardService.getMiddleCodesByLargeCode(largeCode);
     }
+    @Configuration
+    public class MessageConfig {
+        @Bean
+        public MessageSource messageSource() {
+            ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+            messageSource.setBasenames("messages/messages");
+            messageSource.setFallbackToSystemLocale(false);
+            messageSource.setDefaultEncoding("UTF-8");
 
+            return messageSource;
+        }
+    }
 }
