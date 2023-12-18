@@ -2,6 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.api.board.board.mapper.BoardMapper">
+    <select id="getAllBoards" resultType="com.api.board.board.Board">
+        SELECT * FROM board
+    </select>
 
     <select id="getBoardList" parameterType="com.api.board.board.BoardSearch" resultType="int">
         SELECT COUNT(*)

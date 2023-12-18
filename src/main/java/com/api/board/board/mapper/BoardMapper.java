@@ -10,8 +10,9 @@ import org.apache.ibatis.annotations.*;
 
 @Mapper
 public interface BoardMapper {
-    int getBoardList();
+    List<Board> getAllBoards();
 
+    int getBoardList();
     void insertBoard(Board board) throws Exception;
 
     void deleteBoard(Long no);
